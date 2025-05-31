@@ -1,0 +1,7 @@
+CREATE TABLE users (
+    userid NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    password VARCHAR2(32),
+    idlider CHAR(14 BYTE) UNIQUE,
+    CONSTRAINT fk_leader FOREIGN KEY (idlider) REFERENCES lider(cpi)
+);
+
