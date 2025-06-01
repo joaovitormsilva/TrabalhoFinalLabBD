@@ -31,8 +31,10 @@ def show_login(db_controller):
             userid, login, tipo, nacionalidade, escuderia = info_login
             access_level = [tipo]
 
+            print(f'info_login: {info_login}')
+
             if tipo == 'Piloto' and escuderia: #verificar esse IF
-                access_level.append('n_admin')
+                access_level.append('not_admin')
 
             # Inserir no log (função separada)
             db_controller.call_function('inserir_log_login', [login_input], None)

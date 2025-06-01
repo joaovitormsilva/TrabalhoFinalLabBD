@@ -3,7 +3,7 @@ RETURNS TEXT AS $$
 DECLARE
     u USERS%ROWTYPE;
     nacao TEXT := '';
-    faccao TEXT := '';
+    escuderia TEXT := '';
 BEGIN
     SELECT * INTO u FROM USERS
     WHERE login = p_login AND password = crypt(p_senha, password);
@@ -12,16 +12,16 @@ BEGIN
         RETURN 'ERRO: Login ou senha incorretos';
     END IF;
 
-    -- Adiciona nacionalidade e faccao (escuderia) se for piloto
+    -- Adiciona nacionalidade e (escuderia) se for piloto
     IF u.tipo = 'Piloto' THEN
-        SELECT nationality INTO nacao FROM drivers WHERE driverid = u.idoriginal;
-        SELECT name INTO faccao FROM constructors WHERE constructorid = (
-            SELECT constructorid FROM drivers WHERE driverid = u.idoriginal
+        SELECT nationality INTO nacao FROM driver WHERE driverid = u.idoriginal;
+        SELECT name INTO escuderia FROM constructors WHERE constructorid = (
+            SELECT constructorid FROM driver WHERE driverid = u.idoriginal
         );
     ELSIF u.tipo = 'Escuderia' THEN
-        SELECT name INTO faccao FROM constructors WHERE constructorid = u.idoriginal;
+        SELECT name INTO escuderia FROM constructors WHERE constructorid = u.idoriginal;
     END IF;
 
-    RETURN u.userid || ';' || u.login || ';' || u.tipo || ';' || COALESCE(nacao, '') || ';' || COALESCE(faccao, '');
+    RETURN u.userid || ';' || u.login || ';' || u.tipo || ';' || COALESCE(nacao, '') || ';' || COALESCE(escuderia, '');
 END;
 $$ LANGUAGE plpgsql;
