@@ -1,5 +1,6 @@
 import os
 import oracledb
+import psycopg2
 from dotenv import load_dotenv
 
 class DBController:
@@ -8,20 +9,21 @@ class DBController:
         user = os.getenv('user')
         host = os.getenv('host')
         port = os.getenv('port')
-        service_name = os.getenv('service_name')
+        database = os.getenv('database')
         password = os.getenv('password')
-        self.connection = oracledb.connect(user=user, password=password, host=host, port=port, service_name=service_name)
-    
+
+        self.connection = psycopg2.connect(
+            user=user,
+            password=password,
+            host=host,
+            port=port,
+            dbname=database
+        )
+
     def __del__(self):
         self.connection.commit()
         self.connection.close()
 
-    def __map_function_return_type(self, return_type):
-        if return_type in [int, float]:
-            return oracledb.NUMBER
-        if return_type == str:
-            return oracledb.STRING
-    
     def commit(self):
         self.connection.commit()
     
@@ -29,13 +31,15 @@ class DBController:
         self.connection.rollback()
         
     def call_function(self, function_name, function_parameters, return_type):
-        mapped_return_type = self.__map_function_return_type(return_type)
-        converted_function_name = f'a11796893.{function_name}'
         cursor = self.connection.cursor()
         try:
-            output = cursor.callfunc(converted_function_name, mapped_return_type, function_parameters)
+            # Constrói chamada dinâmica à função PostgreSQL
+            params_placeholder = ','.join(['%s'] * len(function_parameters))
+            query = f"SELECT {function_name}({params_placeholder})"
+            cursor.execute(query, function_parameters)
+            result = cursor.fetchone()[0]
             cursor.close()
-            return output
+            return result
         except Exception as e:
             cursor.close()
             raise e

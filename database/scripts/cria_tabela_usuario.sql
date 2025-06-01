@@ -1,7 +1,8 @@
-CREATE TABLE users (
-    userid NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    password VARCHAR2(32),
-    idlider CHAR(14 BYTE) UNIQUE,
-    CONSTRAINT fk_leader FOREIGN KEY (idlider) REFERENCES lider(cpi)
+-- Criação da tabela de usuários
+CREATE TABLE USERS (
+    userid SERIAL PRIMARY KEY,
+    login TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL, -- Senha armazenada de forma segura
+    tipo TEXT CHECK (tipo IN ('Administrador', 'Escuderia', 'Piloto')) NOT NULL,
+    idoriginal INTEGER NOT NULL -- Referência ao id_piloto ou id_escuderia dependendo do tipo
 );
-

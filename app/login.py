@@ -12,29 +12,50 @@ def show_login(db_controller):
     customtkinter.set_default_color_theme("blue")  # Set the default color theme to blue
 
     # Function to validate login
-    def validate_login(): # Adicionado db_controller como parâmetro
+    def validate_login():
         from home import show_home
         try:
-            cpi, senha = entry1.get(), entry2.get()
-            info_login = db_controller.call_function('PCT_USER_TABLE.fazer_login', [cpi, senha], str)
+            login_input = entry1.get()
+            senha_input = entry2.get()
+            
+            info_login = db_controller.call_function('login_usuario', [login_input, senha_input], str)
             db_controller.commit()
+
+            if info_login.startswith('ERRO:'):
+                show_popup(info_login.split(':', 1)[1].strip())
+                print('Erro do usuário:', info_login)
+                return
+
+            # Parse do retorno
             info_login = [s.strip() for s in info_login.split(';')]
-            id_user, username, cargo, nacao,faccao = info_login
-            access_level = [cargo] if not faccao else [cargo, 'LIDER']
-            db_controller.call_function('PCT_USER_TABLE.INSERIR_LOG', [cpi, 'Login'], str)
+            userid, login, tipo, nacionalidade, escuderia = info_login
+            access_level = [tipo]
+
+            if tipo == 'Piloto' and escuderia: #verificar esse IF
+                access_level.append('n_admin')
+
+            # Inserir no log (função separada)
+            db_controller.call_function('inserir_log_login', [login_input], None)
             db_controller.commit()
-            app.destroy()  # Close the login window
-            show_home(db_controller, id_user, username, access_level, nacao, cpi, faccao) # Passa o db_controller para a próxima tela
+
+            app.destroy()
+            show_home(
+                db_controller, userid, login, access_level,
+                nacionalidade, login_input, escuderia
+            )
+
         except DatabaseError as ex:
             error, = ex.args
-            if error.code == 20000:  # erro lógico 
+            if error.code == 20000:
                 msg_erro = error.message.split(':')[1][:-10].strip()
                 show_popup(msg_erro)
                 print('Erro do usuário:', msg_erro)
             else:
                 show_popup('Erro da base de dados (olhar log)')
                 print('Erro da base de dados:', error.code, error.message)
-    
+
+
+        
     def on_closing(db_controller):
         del db_controller
         app.destroy()
@@ -66,7 +87,7 @@ def show_login(db_controller):
     app.geometry("1024x1024")  # Set the size of the window
     app.title("Login")  # Set the title of the window
 
-    img1 = ImageTk.PhotoImage(Image.open("./imgs/back.png"))  # Load the image
+    img1 = ImageTk.PhotoImage(Image.open("app/imgs/back.jpg"), size=(1024,1024))  # Load the image
     l1 = customtkinter.CTkLabel(master = app, image=img1)  # Create a label with the image
     l1.pack()  # Pack the label
 

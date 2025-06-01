@@ -14,7 +14,7 @@ def gera_relatorio(db_controller, a, b, c):
     db_controller.commit()
     show_report_page(s)
 
-def show_home(db_controller, id_user, user_name, access_level, nacao, cpi, faccao):
+def show_home(db_controller, id_user, user_name, access_level, nacao, cpi, escuderia):
     home_window = customtkinter.CTk()
     home_window.geometry("1024x1024")
     home_window.title("Home Page")
@@ -32,7 +32,7 @@ def show_home(db_controller, id_user, user_name, access_level, nacao, cpi, facca
         home_window.destroy()
 
 
-    img1 = ImageTk.PhotoImage(Image.open("./imgs/back.png"))  # Load the image
+    img1 = ImageTk.PhotoImage(Image.open("app/imgs/back.jpg"), size = (1024,1024))  # Load the image
     l1 = customtkinter.CTkLabel(master = home_window, image=img1)  # Create a label with the image
     l1.pack()  # Pack the label
     
@@ -44,8 +44,7 @@ def show_home(db_controller, id_user, user_name, access_level, nacao, cpi, facca
     hl2 = customtkinter.CTkLabel(master=frame, text=f"Bem-vindo, {user_name}", font=("Garamond", 18))
     hl2.place(relx=0.5, rely=0.10, anchor=tkinter.CENTER)
 
-    txt_hl3 = f"Aqui está o que você pode fazer como {access_level[0]} da nação {nacao}"
-    txt_hl3 += f" e líder da facção {faccao}" if faccao else ""
+    txt_hl3 = f"Aqui está o que você pode fazer como {access_level[0]} do sistema {nacao}"
     hl3 = customtkinter.CTkLabel(master=frame, text= txt_hl3, font=("Garamond", 16), wraplength=500)
     hl3.place(relx=0.5, rely=0.15, anchor=tkinter.CENTER)
 

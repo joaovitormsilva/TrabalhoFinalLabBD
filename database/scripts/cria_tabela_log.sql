@@ -1,6 +1,7 @@
-CREATE TABLE LOG_TABLE (
-    userid NUMBER,
-    timestamp DATE DEFAULT SYSDATE,
-    message VARCHAR2(4000),
-    CONSTRAINT fk_userid FOREIGN KEY (userid) REFERENCES users(userid)
+-- Criação da tabela de log de acessos
+CREATE TABLE USERS_LOG (
+    id_log SERIAL PRIMARY KEY,
+    userid INTEGER REFERENCES USERS(userid),
+    data_acesso DATE NOT NULL DEFAULT CURRENT_DATE,
+    hora_acesso TIME NOT NULL DEFAULT CURRENT_TIME
 );
