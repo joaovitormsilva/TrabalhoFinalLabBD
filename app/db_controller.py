@@ -33,13 +33,30 @@ class DBController:
     def call_function(self, function_name, function_parameters, return_type):
         cursor = self.connection.cursor()
         try:
-            # Constrói chamada dinâmica à função PostgreSQL
             params_placeholder = ','.join(['%s'] * len(function_parameters))
-            query = f"SELECT {function_name}({params_placeholder})"
+            query = f"SELECT * FROM {function_name}({params_placeholder})" if return_type == list else f"SELECT {function_name}({params_placeholder})"
+            
             cursor.execute(query, function_parameters)
-            result = cursor.fetchone()[0]
+
+            if return_type == list:
+                result = cursor.fetchall()
+            else:
+                result = cursor.fetchone()[0]
+
             cursor.close()
             return result
+
         except Exception as e:
+            cursor.close()
+            raise e
+        
+    def execute_query(self, query, parameters=None):
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(query, parameters)
+            self.connection.commit()
+            cursor.close()
+        except Exception as e:
+            self.connection.rollback()
             cursor.close()
             raise e

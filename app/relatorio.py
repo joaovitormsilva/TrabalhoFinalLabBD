@@ -1,48 +1,138 @@
-import tkinter as tk
-from tkinter import ttk
 import customtkinter
-import pandas as pd
-from io import StringIO
+import tkinter
+from tkinter import simpledialog, messagebox
+from PIL import Image, ImageTk
+from decimal import Decimal
 
-#customtkinter.set_appearance_mode("dark")  # Set dark mode for all customtkinter widgets
-#customtkinter.set_default_color_theme("blue")  # Set the color theme to blue
+def show_report_page(db_controller, user_type, user_id=None):
+    report_window = customtkinter.CTkToplevel()
+    report_window.geometry("1024x768")
+    report_window.title("Relatórios")
 
-def show_report_page(csv_string):
-    # Create the main window
-    relatorio_window = customtkinter.CTk()
-    relatorio_window.geometry("1024x1024")  
-    relatorio_window.title("Relatório")
+    def on_closing():
+        report_window.destroy()
 
-    # Convert the CSV string to a pandas DataFrame
-    data = StringIO(csv_string)
-    df = pd.read_csv(data, sep=';')
+    report_window.protocol("WM_DELETE_WINDOW", on_closing)
 
-    # Create a frame to hold the table
-    frame = customtkinter.CTkFrame(master=relatorio_window, width=1000, height=500, corner_radius=16) # Create a frame with rounded corners
-    frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)  # Center the frame vertically and horizontally
+    bg_image = ImageTk.PhotoImage(Image.open("app/imgs/back.jpg"))
+    bg_label = customtkinter.CTkLabel(master=report_window, image=bg_image, text="")
+    bg_label.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
 
-    # Configure the frame to use grid layout
-    frame.grid_columnconfigure(0, weight=1)
-    frame.grid_rowconfigure(0, weight=1)
+    frame = customtkinter.CTkFrame(master=report_window, width=1000, height=750, corner_radius=36)
+    frame.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
 
-    # Create the treeview table
-    tree = ttk.Treeview(frame, columns=list(df.columns), show='headings')
+    title = "Relatórios - Admin" if user_type == "admin" else \
+            "Relatórios - Escuderia" if user_type == "escuderia" else \
+            "Relatórios - Piloto"
+    
+    title_label = customtkinter.CTkLabel(master=frame, text=title, font=("Garamond", 24, "bold"))
+    title_label.pack(pady=30)
 
-    # Define the column headings
-    for col in df.columns:
-        tree.heading(col, text=col)
-        tree.column(col, width=200, anchor=tk.CENTER)
+    btn_frame = customtkinter.CTkFrame(master=frame)
+    btn_frame.pack(pady=10)
 
-    # Insert the data into the treeview
-    for index, row in df.iterrows():
-        tree.insert("", tk.END, values=list(row))
+    text_box = tkinter.Text(master=frame, height=20, width=100, wrap="word", font=("Consolas", 12))
+    text_box.pack(pady=20)
+    text_box.configure(state="disabled")
 
-    # Add a scrollbar
-    scrollbar = ttk.Scrollbar(frame, orient="vertical", command=tree.yview)
-    tree.configure(yscrollcommand=scrollbar.set)
+    def show_results(resultados, titulo):
+        text_box.configure(state="normal")
+        text_box.delete("1.0", tkinter.END)
+        text_box.insert(tkinter.END, f"{titulo}\n\n")
 
-    # Place the treeview and scrollbar using grid
-    tree.grid(row=0, column=0, sticky='nsew')
-    scrollbar.grid(row=0, column=1, sticky='ns')
+        for linha in resultados:
+            linha_formatada = []
+            for item in linha:
+                if isinstance(item, Decimal):
+                    linha_formatada.append(f"{item:.2f}")
+                else:
+                    linha_formatada.append(str(item))
+            text_box.insert(tkinter.END, " | ".join(linha_formatada) + "\n")
 
-    relatorio_window.mainloop()
+    text_box.configure(state="disabled")
+
+    if user_type == "admin":
+        def relatorio_status():
+            result = db_controller.call_function("relatorio_status_resultados", [], list)
+            show_results(result, "Relatório: Quantidade de Resultados por Status")
+
+        def relatorio_aeroportos():
+            cidade = simpledialog.askstring("Entrada", "Digite o nome da cidade:", parent=report_window)
+            if cidade:
+                result = db_controller.call_function("relatorio_aeroportos_proximos", [cidade], list)
+                
+                if not result:
+                    messagebox.showinfo("Aviso", f"Nenhum aeroporto encontrado próximo à cidade '{cidade}' ou cidade não encontrada.")
+                else:
+                    show_results(result, f"Relatório: Aeroportos próximos de {cidade}")
+
+        def relatorio_completo_corridas():
+            resultados = db_controller.call_function("relatorio_completo_por_escuderia", [], list)
+            
+            text_box.configure(state="normal")
+            text_box.delete("1.0", tkinter.END)
+            text_box.insert(tkinter.END, "Relatório Completo por Escuderia\n\n")
+
+            escuderia_atual = None
+
+            for linha in resultados:
+                (escuderia, nivel, circuito, corrida, voltas, tempo_total,
+                qtd_corridas_total, qtd_corridas_circuito,
+                min_voltas, avg_voltas, max_voltas) = linha
+
+                if escuderia != escuderia_atual:
+                    text_box.insert(tkinter.END, f"\n=== Escuderia: {escuderia} ===\n")
+                    escuderia_atual = escuderia
+
+                if nivel == 1:
+                    text_box.insert(tkinter.END, f"1. Total de Corridas: {qtd_corridas_total}\n")
+                elif nivel == 2:
+                    text_box.insert(tkinter.END, f"2. Circuito: {circuito}\n")
+                    text_box.insert(tkinter.END, f"   - Corridas: {qtd_corridas_circuito} | Voltas (min/média/máx): {min_voltas}/{avg_voltas}/{max_voltas}\n")
+                elif nivel == 3:
+                    text_box.insert(tkinter.END, f"3. Corrida: {corrida} | Circuito: {circuito} | Voltas: {voltas} | Tempo Total: {tempo_total} s\n")
+
+            text_box.configure(state="disabled")
+        btn1 = customtkinter.CTkButton(master=btn_frame, text="Status Resultados", command=relatorio_status)
+        btn2 = customtkinter.CTkButton(master=btn_frame, text="Aeroportos por Cidade", command=relatorio_aeroportos)
+        btn3 = customtkinter.CTkButton(master=btn_frame, text="Relatório de Corridas", command=relatorio_completo_corridas)
+
+        btn1.grid(row=0, column=0, padx=5, pady=5)
+        btn2.grid(row=0, column=1, padx=5, pady=5)
+        btn3.grid(row=0, column=2, padx=5, pady=5)
+
+
+
+    # Relatórios para ESCUDERIA
+    elif user_type == "escuderia":
+        def total_corridas():
+            result = db_controller.call_function("relatorio_total_corridas")
+            show_results([("Total de Corridas", result[0][0])], "Relatório: Total de Corridas")
+
+        btn = customtkinter.CTkButton(master=btn_frame, text="Total Corridas", command=total_corridas)
+        btn.grid(row=0, column=0, padx=5, pady=5)
+
+    # Relatórios para PILOTO
+    elif user_type == "piloto":
+        def consultar_aeroportos():
+            # popup para entrada da cidade
+            def submit():
+                cidade = entry.get()
+                popup.destroy()
+                result = db_controller.call_function("relatorio_aeroportos_proximos", (cidade,))
+                show_results(result, f"Aeroportos próximos de {cidade}")
+
+            popup = customtkinter.CTkToplevel()
+            popup.geometry("400x150")
+            popup.title("Digite a cidade")
+
+            entry = customtkinter.CTkEntry(popup, placeholder_text="Nome da cidade")
+            entry.pack(pady=10)
+
+            submit_btn = customtkinter.CTkButton(popup, text="Buscar", command=submit)
+            submit_btn.pack(pady=10)
+
+        btn = customtkinter.CTkButton(master=btn_frame, text="Aeroportos Próximos", command=consultar_aeroportos)
+        btn.grid(row=0, column=0, padx=5, pady=5)
+
+    report_window.bg_image = bg_image

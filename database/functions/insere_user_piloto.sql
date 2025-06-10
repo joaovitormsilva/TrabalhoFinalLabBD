@@ -4,10 +4,10 @@ RETURNS TRIGGER AS $$
 BEGIN
     INSERT INTO USERS (login, password, tipo, idoriginal)
     VALUES (
-        NEW.driverref || 'd',
+        NEW.driverref || '_d',
         crypt(NEW.driverref, gen_salt('bf')),
         'Piloto',
-        NEW.id_piloto
+        NEW.driverid
     );
     RETURN NEW;
 END;

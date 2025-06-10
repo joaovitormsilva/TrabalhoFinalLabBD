@@ -1,6 +1,5 @@
 -- Inserção dos pilotos que ainda não estão cadastrados como usuários
 
-/*
 
 INSERT INTO USERS (login, password, tipo, idoriginal)
 SELECT 
@@ -15,7 +14,3 @@ WHERE NOT EXISTS (
     WHERE u.tipo = 'Piloto' AND u.idoriginal = d.driverid
 );
 
-*/
-
-SELECT * from users;
-SELECT * from driver;
