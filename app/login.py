@@ -3,8 +3,12 @@ import customtkinter
 import os
 from PIL import ImageTk, Image
 from psycopg2 import DatabaseError
+from dotenv import load_dotenv
+
 
 from db_controller import DBController
+
+load_dotenv()
 
 def show_login(db_controller):
 
@@ -77,7 +81,9 @@ def show_login(db_controller):
     app.geometry("1024x1024")  
     app.title("Login")  
 
-    img1 = ImageTk.PhotoImage(Image.open("app/imgs/back.jpg"), size=(1024,1024))
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    image_path = os.path.join(script_dir, "imgs", "back.jpg")
+    img1 = ImageTk.PhotoImage(Image.open(image_path).resize((1024, 1024)))
     l1 = customtkinter.CTkLabel(master = app, image=img1) 
     l1.pack()  # Pack the label
 
