@@ -4,7 +4,24 @@
 
 -- d.driverref, d.dateofbirth, d.nationality from driver d where d.driverid 
 
+SELECT * from results ORDER BY resultid DESC;
+
+
 SELECT * FROM constructors;
+
+SELECT * from driver ORDER BY driverid desc;
+
+SELECT * from users ORDER BY userid desc;
+
+
+
+SELECT * from driver ORDER BY driverid desc;
+
+SELECT * from users ORDER BY userid desc;
+
+
+/*
+
 
 SELECT 
     u.userid,
@@ -46,3 +63,5 @@ ON ra.raceid = re.raceid
 JOIN constructors c
 ON re.constructorid = c.constructorid
 WHERE c.name='McLaren';
+
+*/

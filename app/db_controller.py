@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 class DBController:
     def __init__(self):
+        self.usuario_logado= None
         load_dotenv()
         user = os.getenv('user')
         host = os.getenv('host')
@@ -68,4 +69,9 @@ class DBController:
             self.connection.rollback()
             cursor.close()
             raise e
+        
+    def get_constructor_id_by_name(self, name):
+        query = "SELECT constructorid FROM constructors WHERE LOWER(name) = LOWER(%s)"
+        result = self.execute_query(query, (name,))
+        return result[0][0] if result else None
 

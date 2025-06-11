@@ -40,6 +40,8 @@ def show_login(db_controller):
             db_controller.call_function('inserir_log_login', [login_input], None)
             db_controller.commit()
 
+            db_controller.usuario_logado = info_login[4]
+            
             app.destroy()
             show_home(
                 db_controller, userid, login, access_level,
@@ -89,7 +91,7 @@ def show_login(db_controller):
     app.geometry("1024x1024")  # Set the size of the window
     app.title("Login")  # Set the title of the window
 
-    img1 = ImageTk.PhotoImage(Image.open("imgs/back.jpg"), size=(1024,1024))  # Load the image
+    img1 = ImageTk.PhotoImage(Image.open("app/imgs/back.jpg"), size=(1024,1024))  # Load the image
     l1 = customtkinter.CTkLabel(master = app, image=img1)  # Create a label with the image
     l1.pack()  # Pack the label
 

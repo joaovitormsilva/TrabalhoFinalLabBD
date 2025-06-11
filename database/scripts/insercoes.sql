@@ -1,4 +1,4 @@
-CREATE TABLE STATUS (
+CREATE OR REPLACE TABLE STATUS (
     StatusId INTEGER PRIMARY KEY,
     Status VARCHAR(255)
 );
@@ -35,7 +35,7 @@ CREATE TABLE DRIVER(
     Code VARCHAR(100),
     Forename VARCHAR(200),
     Surname VARCHAR(200),
-    DateOfBirth DATE,
+    dob DATE,
     Nationality VARCHAR(200),
     URL VARCHAR(200)
 );

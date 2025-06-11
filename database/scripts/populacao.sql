@@ -20,7 +20,7 @@ DELIMITER ','
 CSV HEADER;
 
 COPY DRIVER
-FROM 'C:\Program Files\PostgreSQL\17\data\imports\LabBD\driver.csv'
+FROM 'data/driver.csv'
 DELIMITER ','
 CSV HEADER;
 

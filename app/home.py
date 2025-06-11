@@ -22,7 +22,7 @@ def show_home(db_controller, id_user, user_name, access_level, nacao, cpi, escud
     home_window.protocol("WM_DELETE_WINDOW", on_closing)
 
     # Plano de fundo
-    bg_image = CTkImage(Image.open("imgs/back.jpg"), size=(1024, 1024))  # ajuste o tamanho conforme necessário
+    bg_image = CTkImage(Image.open("app/imgs/back.jpg"), size=(1024, 1024))  # ajuste o tamanho conforme necessário
     bg_label = customtkinter.CTkLabel(master=home_window, image=bg_image, text="")
     bg_label.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
 
@@ -208,9 +208,9 @@ def visualizar_pilotos(db_controller, escuderia):
     # Janela secundária
     janela = customtkinter.CTkToplevel()
     janela.title("Buscar Pilotos por Sobrenome")
-    janela.geometry("400x300")
+    janela.geometry("700x700")
     janela.focus_set()
-    janela.grab_set()
+    janela.after(100, lambda: janela.grab_set())
     janela.transient()
 
     # Label e campo de entrada
@@ -236,7 +236,7 @@ def visualizar_pilotos(db_controller, escuderia):
         
         # Consulta ao banco de dados
         query = """
-        SELECT DISTINCT d.surname, d.forename, d.dateofbirth, d.nationality
+        SELECT DISTINCT d.surname, d.forename, d.dob, d.nationality
         FROM driver d 
         JOIN results r ON d.driverid = r.driverid
         JOIN constructors c ON r.constructorid = c.constructorid
@@ -247,6 +247,7 @@ def visualizar_pilotos(db_controller, escuderia):
         resultado_text.configure(state="normal") # Habilita para editar
         resultado_text.delete("1.0", tkinter.END)
         
+
         print("Escuderia:", escuderia)
         print("Sobrenome:", sobrenome)
         print("Query:", query)
@@ -288,11 +289,35 @@ def cadastrar_piloto(db_controller):
 
                 pilotos_inseridos = 0
                 pilotos_duplicados = []
-                
+
+                # Obter nome da escuderia logada
+                escuderia = db_controller.usuario_logado
+
+                # Buscar constructorid da escuderia
+                cursor.execute("SELECT constructorid FROM constructors WHERE LOWER(name) = LOWER(%s)", (escuderia,))
+                resultado = cursor.fetchone()
+                constructor_id = resultado[0] if resultado else None
+
+                if constructor_id is None:
+                    messagebox.showerror("Erro", f"Escuderia '{escuderia}' não encontrada no banco.")
+                    return
+
+                # Obter raceid (última corrida)
+                cursor.execute("SELECT MAX(raceid) FROM races")
+                race_id = cursor.fetchone()[0]
+                if race_id is None:
+                    messagebox.showerror("Erro", "Nenhuma corrida encontrada na tabela 'races'.")
+                    return
+
+                # Obter próximo resultid
+                cursor.execute("SELECT MAX(resultid) FROM results")
+                max_resultid = cursor.fetchone()[0]
+                next_resultid = 1 if max_resultid is None else max_resultid + 1
+
                 for linha in leitor:
                     if len(linha) < 7:
                         continue  # pula linhas incompletas
-                    # Extrair campos
+
                     driverRef = linha[0].strip()
                     number = linha[1].strip() if linha[1].strip() else None
                     code = linha[2].strip()
@@ -302,27 +327,44 @@ def cadastrar_piloto(db_controller):
                     nationality = linha[6].strip()
                     url = linha[7].strip() if len(linha) >= 7 and linha[7].strip() else None
 
-                    # Verificar duplicidade
                     cursor.execute("""
                         SELECT COUNT(*) FROM driver WHERE LOWER(forename) = LOWER(%s) AND LOWER(surname) = LOWER(%s)
                     """, (forename, surname))
                     ja_existe = cursor.fetchone()[0] > 0
-                    
-                    print('Ja existe: ', ja_existe)
 
                     if ja_existe:
                         pilotos_duplicados.append(f"{forename} {surname}")
                         continue
 
-                    # Inserção no banco
-                    query = """
-                        INSERT INTO driver (driverid, driverref, number, code, forename, surname, dateofbirth, nationality, url)
+                    # Inserção na tabela driver
+                    query_driver = """
+                        INSERT INTO driver (driverid, driverref, number, code, forename, surname, dob, nationality, url)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """
-                    valores = [next_id, driverRef, number, code, forename, surname, dob, nationality, url]
-                    cursor.execute(query, valores)
+                    valores_driver = [next_id, driverRef, number, code, forename, surname, dob, nationality, url]
+                    cursor.execute(query_driver, valores_driver)
+
+                    # Inserção na tabela results
+                    query_result = """
+                        INSERT INTO results (
+                            resultid, raceid, driverid, constructorid,
+                            number, grid, position, positionText, positionOrder,
+                            points, laps, time, milliseconds, fastestLap, rank,
+                            fastestLapTime, fastestLapSpeed, statusid
+                        )
+                        VALUES (
+                            %s, %s, %s, %s,
+                            NULL, NULL, NULL, NULL, NULL,
+                            0, 0, NULL, NULL, NULL, NULL,
+                            NULL, NULL, 1
+                        )
+                    """
+                    cursor.execute(query_result, (
+                        next_resultid, race_id, next_id, constructor_id
+                    ))
 
                     next_id += 1
+                    next_resultid += 1
                     pilotos_inseridos += 1
 
                 db_controller.connection.commit()
@@ -337,13 +379,12 @@ def cadastrar_piloto(db_controller):
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao ler o arquivo: {str(e)}")
 
-
     # Janela principal
     janela = customtkinter.CTkToplevel()
     janela.title("Cadastrar Pilotos via Arquivo")
     janela.geometry("400x200")
     janela.focus_set()
-    janela.grab_set()
+    janela.after(100, lambda: janela.grab_set())
     janela.transient()
 
     label = customtkinter.CTkLabel(janela, text="Clique no botão para escolher o arquivo:")
@@ -374,6 +415,8 @@ def build_escuderia_home(frame, db_controller, cpi, escuderia):
         command=lambda: cadastrar_piloto(db_controller)
     )
     btn2.place(relx=0.5, rely=0.45, anchor=tkinter.CENTER)
+
+
 
 def build_piloto_home(frame, db_controller, cpi):
     # Função ainda não implementada

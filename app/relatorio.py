@@ -9,7 +9,7 @@ def show_report_page(db_controller, user_type, user_id=None):
     report_window.geometry("1024x768")
     report_window.title("Relatórios")
     report_window.focus_set()
-    report_window.grab_set()
+    report_window.after(100, lambda: report_window.grab_set())
     report_window.transient()
 
     def on_closing():
@@ -17,7 +17,7 @@ def show_report_page(db_controller, user_type, user_id=None):
 
     report_window.protocol("WM_DELETE_WINDOW", on_closing)
 
-    bg_image = ImageTk.PhotoImage(Image.open("imgs/back.jpg"))
+    bg_image = ImageTk.PhotoImage(Image.open("app/imgs/back.jpg"))
     bg_label = customtkinter.CTkLabel(master=report_window, image=bg_image, text="")
     bg_label.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
 

@@ -2,7 +2,7 @@
 -- IMPORTANTE: essa função simula a lógica de hash. Em produção, isso é feito no backend.
 
 
-/*
+
 CREATE OR REPLACE FUNCTION cria_usuario(login TEXT, senha TEXT, tipo TEXT, id_original INT)
 RETURNS VOID AS $$
 BEGIN
@@ -18,7 +18,7 @@ $$ LANGUAGE plpgsql;
 
 
 
-
+/*
 SELECT 
     COLUMN_NAME 
 FROM 
@@ -26,6 +26,4 @@ FROM
 WHERE 
     TABLE_NAME  = 'races'
 
-   */ 
-
-SELECT * from results;
+*/

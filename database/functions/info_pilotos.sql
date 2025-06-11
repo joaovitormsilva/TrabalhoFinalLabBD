@@ -15,12 +15,12 @@ BEGIN
         RETURN 'Erro: Piloto não encontrado';
     END IF;
 
-    -- Busca os dados do piloto e da escuderia pela tabela qualifying
+    -- Busca os dados do piloto e da escuderia pela tabela results
     SELECT DISTINCT d.forename, d.surname, c.name
     INTO forename, surname, escuderia_nome
     FROM driver d
-    JOIN qualifying q ON d.driverid = q.driverid
-    JOIN constructors c ON q.constructorid = c.constructorid
+    JOIN results r ON d.driverid = r.driverid
+    JOIN constructors c ON r.constructorid = c.constructorid
     WHERE d.driverid = id_piloto;
 
     -- Retorna os dados no formato esperado
