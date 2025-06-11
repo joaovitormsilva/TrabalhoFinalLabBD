@@ -1,5 +1,5 @@
 import os
-import oracledb
+
 import psycopg2
 from dotenv import load_dotenv
 
@@ -54,9 +54,18 @@ class DBController:
         cursor = self.connection.cursor()
         try:
             cursor.execute(query, parameters)
-            self.connection.commit()
-            cursor.close()
+            
+            # Verifica se é uma consulta SELECT
+            if query.strip().lower().startswith("select"):
+                resultados = cursor.fetchall()
+                cursor.close()
+                return resultados
+            else:
+                self.connection.commit()
+                cursor.close()
+                return None  # ou True, se quiser indicar sucesso
         except Exception as e:
             self.connection.rollback()
             cursor.close()
             raise e
+

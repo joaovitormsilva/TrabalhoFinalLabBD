@@ -20,7 +20,7 @@ def show_home(db_controller, id_user, user_name, access_level, nacao, cpi, escud
     home_window.protocol("WM_DELETE_WINDOW", on_closing)
 
     # Plano de fundo
-    bg_image = CTkImage(Image.open("app/imgs/back.jpg"), size=(1024, 1024))  # ajuste o tamanho conforme necessário
+    bg_image = CTkImage(Image.open("imgs/back.jpg"), size=(1024, 1024))  # ajuste o tamanho conforme necessário
     bg_label = customtkinter.CTkLabel(master=home_window, image=bg_image, text="")
     bg_label.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
 
@@ -190,14 +190,92 @@ def build_admin_dashboard(frame, db_controller, cpi):
     customtkinter.CTkButton(master=btn_frame, text="Cadastrar Escuderia", command=cadastrar_escuderia).grid(row=0, column=0, padx=10, pady=10)
     customtkinter.CTkButton(master=btn_frame, text="Cadastrar Piloto", command=cadastrar_piloto).grid(row=0, column=1, padx=10, pady=10)
 
+# -------------------
+# ESCUDERIA
+# -------------------
+def visualizar_pilotos(db_controller, escuderia):
+    # Janela secundária
+    janela = customtkinter.CTkToplevel()
+    janela.title("Buscar Pilotos por Sobrenome")
+    janela.geometry("400x300")
+    janela.focus_set()
+    janela.grab_set()
+    janela.transient()
 
+    # Label e campo de entrada
+    label = customtkinter.CTkLabel(janela, text="Digite o sobrenome (forename):")
+    label.pack(pady=10)
+
+    entry = customtkinter.CTkEntry(janela, width=250)
+    entry.pack(pady=5)
+
+    # Área para exibir resultados
+    resultado_text = tkinter.Text(janela, height=10, width=40, state="disabled")
+    resultado_text.pack(pady=10)
+
+    def buscar(entry, escuderia):
+        sobrenome = entry.get().strip()
+
+        print("Digitado:", sobrenome)
+
+        if not sobrenome:
+            resultado_text.delete("1.0", tkinter.END) # Limpa o conteúdo atual da área de texto
+            resultado_text.insert(tkinter.END, "Por favor, insira um sobrenome.")
+            return
+        
+        # Consulta ao banco de dados
+        query = """
+        SELECT DISTINCT d.surname, d.forename, d.dateofbirth, d.nationality
+        FROM driver d 
+        JOIN results r ON d.driverid = r.driverid
+        JOIN constructors c ON r.constructorid = c.constructorid
+        WHERE UPPER(c.name) = UPPER(%s) AND UPPER(d.forename) = UPPER(%s);
+        """
+        
+        resultados = db_controller.execute_query(query, (escuderia,sobrenome))
+        resultado_text.configure(state="normal") # Habilita para editar
+        resultado_text.delete("1.0", tkinter.END)
+        
+        print("Escuderia:", escuderia)
+        print("Sobrenome:", sobrenome)
+        print("Query:", query)
+        print("Resultados da consulta:", resultados)
+     
+
+        if resultados:
+            for row in resultados:
+                nome_completo = f"{row[0]} {row[1]}"
+                dob = row[2]
+                nacionalidade = row[3]
+                resultado_text.insert(tkinter.END, f"Nome: {nome_completo}\nData de nascimento: {dob}\nNacionalidade: {nacionalidade}\n\n")
+        else:
+            resultado_text.insert(tkinter.END, "Nenhum piloto encontrado com esse sobrenome.")
+
+    resultado_text.configure(state="disabled")  # Bloqueia edição
+
+    botao_buscar = customtkinter.CTkButton(janela, text="Buscar", command=lambda: buscar(entry, escuderia))
+    botao_buscar.pack(pady=5)
+
+def cadastrar_pilotos():
+    pass
+    
 def build_escuderia_home(frame, db_controller, cpi, escuderia):
     customtkinter.CTkLabel(master=frame, text=f"Painel da Escuderia {escuderia}", font=("Garamond", 14)).place(relx=0.5, rely=0.1, anchor=tkinter.CENTER)
 
-    btn1 = customtkinter.CTkButton(master=frame, text="Visualizar Pilotos", width=200, command=lambda: print("Visualizar pilotos"))
+    btn1 = customtkinter.CTkButton(
+        master=frame,
+        text="Visualizar Pilotos",
+        width=200,
+        command=lambda: visualizar_pilotos(db_controller, escuderia)
+    )
     btn1.place(relx=0.5, rely=0.3, anchor=tkinter.CENTER)
 
-    btn2 = customtkinter.CTkButton(master=frame, text="Cadastrar Novo Piloto", width=200, command=lambda: print("Cadastrar piloto"))
+    btn2 = customtkinter.CTkButton(
+        master=frame,
+        text="Cadastrar Novo Piloto",
+        width=200,
+        command=lambda: cadastrar_pilotos(db_controller, escuderia)
+    )
     btn2.place(relx=0.5, rely=0.45, anchor=tkinter.CENTER)
 
 def build_piloto_home(frame, db_controller, cpi):
