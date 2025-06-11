@@ -1,5 +1,6 @@
 import tkinter
 import customtkinter
+import os
 from PIL import ImageTk, Image
 from psycopg2 import DatabaseError
 
@@ -16,7 +17,7 @@ def show_login(db_controller):
             login_input = entry1.get()
             senha_input = entry2.get()
             
-            info_login = db_controller.call_function('login_usuario', [login_input, senha_input], str)
+            info_login = db_controller.call_function('login_usuario', [str(login_input), str(senha_input)], str)
             db_controller.commit()
 
             if info_login.startswith('ERRO:'):
@@ -76,7 +77,7 @@ def show_login(db_controller):
     app.geometry("1024x1024")  
     app.title("Login")  
 
-    img1 = ImageTk.PhotoImage(Image.open("imgs/back.jpg"), size=(1024,1024)) 
+    img1 = ImageTk.PhotoImage(Image.open("app/imgs/back.jpg"), size=(1024,1024))
     l1 = customtkinter.CTkLabel(master = app, image=img1) 
     l1.pack()  # Pack the label
 
