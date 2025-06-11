@@ -1,6 +1,3 @@
--- Inserção dos pilotos que ainda não estão cadastrados como usuários
-
-
 INSERT INTO USERS (login, password, tipo, idoriginal)
 SELECT 
     d.driverref || '_d' AS login,

@@ -1,5 +1,3 @@
-
-
 CREATE OR REPLACE FUNCTION dashboard_admin_qtds()
 RETURNS TEXT AS $$
 DECLARE

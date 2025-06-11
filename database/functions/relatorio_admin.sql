@@ -135,7 +135,6 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
 
-    -- 1. Total de corridas por escuderia
     SELECT 
         constructors.name AS escuderia,
         1::SMALLINT AS nivel,
@@ -155,7 +154,6 @@ BEGIN
 
     UNION ALL
 
-    -- 2. Corridas por circuito (mín/média/máx de voltas)
     SELECT 
         constructors.name AS escuderia,
         2::SMALLINT AS nivel,
@@ -181,7 +179,6 @@ BEGIN
 
     UNION ALL
 
-    -- 3. Corrida por corrida: voltas e tempo
     SELECT 
         constructors.name AS escuderia,
         3::SMALLINT AS nivel,

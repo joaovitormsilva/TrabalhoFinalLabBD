@@ -1,17 +1,15 @@
 import tkinter
 import customtkinter
 from PIL import ImageTk, Image
+from psycopg2 import DatabaseError
 
 from db_controller import DBController
-from oracledb.exceptions import DatabaseError
-
 
 def show_login(db_controller):
 
-    customtkinter.set_appearance_mode("dark")  # Set the appearance mode to system
-    customtkinter.set_default_color_theme("blue")  # Set the default color theme to blue
+    customtkinter.set_appearance_mode("dark")  
+    customtkinter.set_default_color_theme("blue") 
 
-    # Function to validate login
     def validate_login():
         from home import show_home
         try:
@@ -26,14 +24,13 @@ def show_login(db_controller):
                 print('Erro do usuário:', info_login)
                 return
 
-            # Parse do retorno
             info_login = [s.strip() for s in info_login.split(';')]
             userid, login, tipo, nacionalidade, escuderia = info_login
             access_level = [tipo]
 
             print(f'info_login: {info_login}')
 
-            if tipo == 'Piloto' and escuderia: #verificar esse IF
+            if tipo == 'Piloto' and escuderia: 
                 access_level.append('not_admin')
 
             # Inserir no log (função separada)
@@ -46,17 +43,9 @@ def show_login(db_controller):
                 nacionalidade, login_input, escuderia
             )
 
-        except DatabaseError as ex:
-            error, = ex.args
-            if error.code == 20000:
-                msg_erro = error.message.split(':')[1][:-10].strip()
-                show_popup(msg_erro)
-                print('Erro do usuário:', msg_erro)
-            else:
-                show_popup('Erro da base de dados (olhar log)')
-                print('Erro da base de dados:', error.code, error.message)
-
-
+        except DatabaseError as error:
+            print("Erro:", str(error))
+            
         
     def on_closing(db_controller):
         del db_controller
@@ -64,14 +53,13 @@ def show_login(db_controller):
         
     def show_popup(message):
         popup = tkinter.Toplevel()
-        popup.geometry('300x100')  # Set the size of the popup window
+        popup.geometry('300x100')  
         popup.title('Popup Message')
         
-        popup.configure(bg='#202845')  # Dark blue background color
+        popup.configure(bg='#202845') 
         label = tkinter.Label(popup, text=message, padx=20, pady=20, fg='white', bg='#202845', font=('Garamond', 12))
         label.pack()
         
-        # Center the popup window
         popup.update_idletasks()
         width = popup.winfo_width()
         height = popup.winfo_height()
@@ -79,40 +67,39 @@ def show_login(db_controller):
         y = (popup.winfo_screenheight() // 2) - (height // 2)
         popup.geometry('{}x{}+{}+{}'.format(width, height, x, y))
         
-        # Automatically close the popup after 3000 milliseconds (3 seconds)
         popup.after(2500, popup.destroy)
         
         popup.mainloop()
         
 
-    app = customtkinter.CTk()  # Create the main window
-    app.geometry("1024x1024")  # Set the size of the window
-    app.title("Login")  # Set the title of the window
+    app = customtkinter.CTk() 
+    app.geometry("1024x1024")  
+    app.title("Login")  
 
-    img1 = ImageTk.PhotoImage(Image.open("app/imgs/back.jpg"), size=(1024,1024))  # Load the image
-    l1 = customtkinter.CTkLabel(master = app, image=img1)  # Create a label with the image
+    img1 = ImageTk.PhotoImage(Image.open("app/imgs/back.jpg"), size=(1024,1024)) 
+    l1 = customtkinter.CTkLabel(master = app, image=img1) 
     l1.pack()  # Pack the label
 
-    frame = customtkinter.CTkFrame(master=l1, width=480, height=500, corner_radius=36)  # Create a frame with rounded corners
-    frame.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER) # Place the frame in the center of the label
+    frame = customtkinter.CTkFrame(master=l1, width=480, height=500, corner_radius=36) 
+    frame.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
 
-    l2 = customtkinter.CTkLabel(master=frame, text="Log into your account", font=("Garamond", 20))  # Create a label with text
-    l2.place(relx=0.5, rely=0.15, anchor=tkinter.CENTER)  # Place the label in the center of the frame
+    l2 = customtkinter.CTkLabel(master=frame, text="Log into your account", font=("Garamond", 20))  
+    l2.place(relx=0.5, rely=0.15, anchor=tkinter.CENTER) 
 
     l2 = customtkinter.CTkLabel(master=frame, text="Login", font=("Garamond", 16))  
     l2.place(relx = 0.2, rely=0.3, anchor=tkinter.CENTER)  
 
-    entry1 = customtkinter.CTkEntry(master=frame, placeholder_text="Login", height=40, width=350, corner_radius=32)  # Create an entry with a placeholder
-    entry1.place(relx=0.5, rely=0.38, anchor=tkinter.CENTER)  # Place the entry in the center of the frame
+    entry1 = customtkinter.CTkEntry(master=frame, placeholder_text="Login", height=40, width=350, corner_radius=32) 
+    entry1.place(relx=0.5, rely=0.38, anchor=tkinter.CENTER) 
 
     l2 = customtkinter.CTkLabel(master=frame, text="Password", font=("Garamond", 16))  
     l2.place(relx = 0.24, rely=0.5, anchor=tkinter.CENTER)  
 
     entry2 = customtkinter.CTkEntry(master=frame, placeholder_text="Password", height=40, width=350, corner_radius=32, show = "*")  # Create an entry with a placeholder
-    entry2.place(relx=0.5, rely=0.58, anchor=tkinter.CENTER)  # Place the entry in the center of the frame
+    entry2.place(relx=0.5, rely=0.58, anchor=tkinter.CENTER)  
 
-    button1 = customtkinter.CTkButton(master=frame, text="Log in", width=350, height=40, corner_radius=32, command=lambda: validate_login())  # Passa o db_controller para validate_login
-    button1.place(relx=0.5, rely=0.75, anchor=tkinter.CENTER)  # Place the button in the center of the frame
+    button1 = button1 = customtkinter.CTkButton(master=frame, text="Log in", width=350, height=40, corner_radius=32, command=validate_login)
+    button1.place(relx=0.5, rely=0.75, anchor=tkinter.CENTER)  
 
     app.protocol("WM_DELETE_WINDOW", lambda: on_closing(db_controller))
     app.mainloop()  # Start the main loop
@@ -120,5 +107,5 @@ def show_login(db_controller):
 
 if __name__ == "__main__":
     print('Conectando ao banco de dados...')
-    db_controller = DBController()  # Inicializa o controlador do banco de dados
-    show_login(db_controller)  # Exibe a tela de login
+    db_controller = DBController()  
+    show_login(db_controller)  

@@ -1,17 +1,22 @@
--- Trigger function para inserir usuário escuderia ao cadastrar uma nova escuderia
-
-
 CREATE OR REPLACE FUNCTION insere_usuario_escuderia()
 RETURNS TRIGGER AS $$
+DECLARE
+    v_login TEXT := NEW.constructorref || '_c';
 BEGIN
+    IF EXISTS (SELECT 1 FROM USERS WHERE login = v_login) THEN
+        RAISE EXCEPTION 'Login % já existe. Inserção cancelada.', v_login;
+    END IF;
+
     INSERT INTO USERS (login, password, tipo, idoriginal)
     VALUES (
-        NEW.constructorref || '_c',
+        v_login,
         crypt(NEW.constructorref, gen_salt('bf')),
         'Escuderia',
         NEW.constructorid
     );
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
 

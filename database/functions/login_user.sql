@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION login_usuario(p_login TEXT, p_senha TEXT)
+CREATE OR REPLACE FUNCTION public.login_usuario(p_login TEXT, p_senha TEXT)
 RETURNS TEXT AS $$
 DECLARE
     u USERS%ROWTYPE;
@@ -12,7 +12,6 @@ BEGIN
         RETURN 'ERRO: Login ou senha incorretos';
     END IF;
 
-    -- Adiciona nacionalidade e (escuderia) se for piloto
     IF u.tipo = 'Piloto' THEN
         SELECT nationality INTO nacao FROM driver WHERE driverid = u.idoriginal;
         SELECT name INTO escuderia FROM constructors WHERE constructorid = (

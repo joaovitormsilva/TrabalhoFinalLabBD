@@ -1,4 +1,3 @@
--- Criação da tabela de log de acessos
 CREATE TABLE USERS_LOG (
     id_log SERIAL PRIMARY KEY,
     userid INTEGER REFERENCES USERS(userid),

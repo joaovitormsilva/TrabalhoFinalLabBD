@@ -1,28 +1,31 @@
 import os
-import oracledb
 import psycopg2
 from dotenv import load_dotenv
 
+load_dotenv()
+
 class DBController:
     def __init__(self):
-        load_dotenv()
-        user = os.getenv('user')
-        host = os.getenv('host')
-        port = os.getenv('port')
-        database = os.getenv('database')
-        password = os.getenv('password')
-
-        self.connection = psycopg2.connect(
-            user=user,
-            password=password,
-            host=host,
-            port=port,
-            dbname=database
+        try:
+            self.connection = psycopg2.connect(
+                dbname=os.getenv('database'),
+                user=os.getenv('user'),
+                password=os.getenv('password'),
+                host=os.getenv('host'),
+                port=os.getenv('port')
         )
+          #print("Conexão com o banco de dados estabelecida com sucesso.")
+        except Exception as e:
+            print(f"Erro ao conectar: {e}")
+            self.connection = None
 
     def __del__(self):
-        self.connection.commit()
-        self.connection.close()
+        if hasattr(self, 'connection'):
+            try:
+                self.connection.commit()
+                self.connection.close()
+            except Exception:
+                pass
 
     def commit(self):
         self.connection.commit()
@@ -31,6 +34,20 @@ class DBController:
         self.connection.rollback()
         
     def call_function(self, function_name, function_parameters, return_type):
+        placeholders = ', '.join(['%s'] * len(function_parameters))
+        query = f"SELECT public.{function_name}({placeholders});"
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(query, function_parameters)
+            result = cursor.fetchone()
+            cursor.close()
+            if result:
+                return return_type(result[0])
+            return None
+        except Exception as e:
+            # Trate a exceção ou relance
+            raise e
+
         cursor = self.connection.cursor()
         try:
             params_placeholder = ','.join(['%s'] * len(function_parameters))

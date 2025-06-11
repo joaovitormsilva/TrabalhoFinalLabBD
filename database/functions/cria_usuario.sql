@@ -24,8 +24,6 @@ SELECT
 FROM 
     INFORMATION_SCHEMA.COLUMNS
 WHERE 
-    TABLE_NAME  = 'races'
+    TABLE_NAME  = 'driver'
 
    */ 
-
-SELECT * from results;

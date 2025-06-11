@@ -1,4 +1,3 @@
--- Criação do trigger
 CREATE TRIGGER trigger_escuderia_insert
 AFTER INSERT ON constructors
 FOR EACH ROW

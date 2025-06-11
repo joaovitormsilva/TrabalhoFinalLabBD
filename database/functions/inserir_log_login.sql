@@ -9,6 +9,12 @@ BEGIN
         RAISE EXCEPTION 'Usuário não encontrado para log.';
     END IF;
 
-    INSERT INTO USERS_LOG (userid) VALUES (u_id);
+    INSERT INTO USERS_LOG (userid, data_login, hora_login)
+    VALUES (
+        u_id,
+        CURRENT_DATE,
+        CURRENT_TIME
+    );
 END;
 $$ LANGUAGE plpgsql;
+
