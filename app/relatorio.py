@@ -8,13 +8,16 @@ def show_report_page(db_controller, user_type, user_id=None):
     report_window = customtkinter.CTkToplevel()
     report_window.geometry("1024x768")
     report_window.title("Relatórios")
+    report_window.focus_set()
+    report_window.grab_set()
+    report_window.transient()
 
     def on_closing():
         report_window.destroy()
 
     report_window.protocol("WM_DELETE_WINDOW", on_closing)
 
-    bg_image = ImageTk.PhotoImage(Image.open("app/imgs/back.jpg"))
+    bg_image = ImageTk.PhotoImage(Image.open("imgs/back.jpg"))
     bg_label = customtkinter.CTkLabel(master=report_window, image=bg_image, text="")
     bg_label.place(relx=0.5, rely=0.5, anchor=tkinter.CENTER)
 
@@ -47,7 +50,7 @@ def show_report_page(db_controller, user_type, user_id=None):
                     linha_formatada.append(f"{item:.2f}")
                 else:
                     linha_formatada.append(str(item))
-            text_box.insert(tkinter.END, " | ".join(linha_formatada) + "\n")
+            text_box.insert(tkinter.END, " | ".join(linha_formatada))
 
     text_box.configure(state="disabled")
 
@@ -105,12 +108,25 @@ def show_report_page(db_controller, user_type, user_id=None):
 
     # Relatórios para ESCUDERIA
     elif user_type == "escuderia":
-        def total_corridas():
-            result = db_controller.call_function("relatorio_total_corridas")
-            show_results([("Total de Corridas", result[0][0])], "Relatório: Total de Corridas")
+        def lista_vitorias():
+            print("user id: ", user_id)
+            
+            result = db_controller.call_function('listar_vitorias_escuderia', (user_id,), return_type='TEXT')
+            print('2dasdasd', result)
+            show_results(result, "Relatório: Lista de Vitórias")
 
-        btn = customtkinter.CTkButton(master=btn_frame, text="Total Corridas", command=total_corridas)
-        btn.grid(row=0, column=0, padx=5, pady=5)
+        btn = customtkinter.CTkButton(master=btn_frame, text="Lista Vitórias", command=lista_vitorias)
+        btn.grid(row=0, column=0, pady=10)
+
+        def lista_resultados():
+            print("user id: ", user_id)
+
+            result = db_controller.call_function('listar_resultados_por_status_escuderia', (user_id,), return_type='TEXT')
+            print('1dasdasd', result)
+            show_results(result, "Relatório: Lista de Resultados")
+
+        btn = customtkinter.CTkButton(master=btn_frame, text="Lista Resultados", command=lista_resultados)
+        btn.grid(row=4, column=0, pady=10)
 
     # Relatórios para PILOTO
     elif user_type == "piloto":
