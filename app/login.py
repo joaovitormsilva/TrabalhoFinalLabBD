@@ -76,7 +76,7 @@ def show_login(db_controller):
     app.geometry("1024x1024")  
     app.title("Login")  
 
-    img1 = ImageTk.PhotoImage(Image.open("app/imgs/back.jpg"), size=(1024,1024)) 
+    img1 = ImageTk.PhotoImage(Image.open("imgs/back.jpg"), size=(1024,1024)) 
     l1 = customtkinter.CTkLabel(master = app, image=img1) 
     l1.pack()  # Pack the label
 

@@ -2,7 +2,9 @@ CREATE OR REPLACE FUNCTION qtd_pilotos_escuderia(p_nome_escuderia TEXT)
 RETURNS TEXT AS $$
 DECLARE
     v_qtd INTEGER;
+    v_nome_constructor TEXT;
 BEGIN
+   
     SELECT COUNT(DISTINCT q.driverid)
     INTO v_qtd
     FROM qualifying q
