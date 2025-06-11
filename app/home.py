@@ -419,5 +419,19 @@ def build_escuderia_home(frame, db_controller, cpi, escuderia):
 
 
 def build_piloto_home(frame, db_controller, cpi):
-    # Função ainda não implementada
-    pass
+    result = db_controller.call_function("info_piloto_dashboard", (cpi,), [])
+    if isinstance(result, str):
+        label = customtkinter.CTkLabel(frame, text=result)
+        label.pack()
+        return
+
+    title = customtkinter.CTkLabel(frame, text="Dashboard do Piloto", font=("Arial", 18, "bold"))
+    title.pack(pady=10)
+
+    for row in result:
+        texto = f"Ano: {row[2]} | Circuito: {row[3]} | Pontos: {row[4]} | Vitórias: {row[5]} | Corridas: {row[6]}"
+        item = customtkinter.CTkLabel(frame, text=texto)
+        item.pack(anchor="w", padx=20)
+
+    anos_label = customtkinter.CTkLabel(frame, text=f"Primeiro Ano: {result[0][0]} | Último Ano: {result[0][1]}")
+    anos_label.pack(pady=10)

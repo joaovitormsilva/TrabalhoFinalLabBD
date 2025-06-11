@@ -4,22 +4,7 @@
 
 -- d.driverref, d.dateofbirth, d.nationality from driver d where d.driverid 
 
-SELECT * from results ORDER BY resultid DESC;
-
-
-SELECT * FROM constructors;
-
-SELECT * from driver ORDER BY driverid desc;
-
-SELECT * from users ORDER BY userid desc;
-
-
-
-SELECT * from driver ORDER BY driverid desc;
-
-SELECT * from users ORDER BY userid desc;
-
-
+SELECT * from status;
 /*
 
 

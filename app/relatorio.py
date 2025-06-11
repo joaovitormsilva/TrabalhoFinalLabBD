@@ -130,25 +130,29 @@ def show_report_page(db_controller, user_type, user_id=None):
 
     # Relatórios para PILOTO
     elif user_type == "piloto":
-        def consultar_aeroportos():
-            # popup para entrada da cidade
-            def submit():
-                cidade = entry.get()
-                popup.destroy()
-                result = db_controller.call_function("relatorio_aeroportos_proximos", (cidade,))
-                show_results(result, f"Aeroportos próximos de {cidade}")
+        def relatorio_pontos():
+            result = db_controller.call_function("info_piloto_dashboard", (user_id,), return_type="all")
+            show_results(result, "Relatório 6: Pontos por Ano e Corrida")
 
-            popup = customtkinter.CTkToplevel()
-            popup.geometry("400x150")
-            popup.title("Digite a cidade")
+        def relatorio_status():
+            # Buscar idOriginal a partir do login
+            query = "SELECT idOriginal FROM USERS WHERE login = %s"
+            with db_controller.connection.cursor() as cursor:
+                cursor.execute(query, (user_id,))
+                result_id = cursor.fetchone()
+                if result_id is None:
+                    raise ValueError("Usuário não encontrado.")
+                user_id_numeric = result_id[0]
 
-            entry = customtkinter.CTkEntry(popup, placeholder_text="Nome da cidade")
-            entry.pack(pady=10)
+            # Chamada correta com id inteiro
+            result = db_controller.call_function("relatorio_status_resultados", (user_id_numeric,), return_type="all")
+            show_results(result, "Relatório 7: Status das Corridas")
 
-            submit_btn = customtkinter.CTkButton(popup, text="Buscar", command=submit)
-            submit_btn.pack(pady=10)
+        btn1 = customtkinter.CTkButton(master=btn_frame, text="Relatório 6 - Pontos por Ano", command=relatorio_pontos)
+        btn1.grid(row=0, column=0, padx=5, pady=5)
 
-        btn = customtkinter.CTkButton(master=btn_frame, text="Aeroportos Próximos", command=consultar_aeroportos)
-        btn.grid(row=0, column=0, padx=5, pady=5)
+        btn2 = customtkinter.CTkButton(master=btn_frame, text="Relatório 7 - Status das Corridas", command=relatorio_status)
+        btn2.grid(row=0, column=1, padx=5, pady=5)
+
 
     report_window.bg_image = bg_image
