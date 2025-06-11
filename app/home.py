@@ -216,7 +216,7 @@ def visualizar_pilotos(db_controller, escuderia):
     def buscar(entry, escuderia):
         sobrenome = entry.get().strip()
 
-        print("Digitado:", sobrenome)
+        print("Digitado:", sobrenome) # imprimir
 
         if not sobrenome:
             resultado_text.delete("1.0", tkinter.END) # Limpa o conteúdo atual da área de texto
@@ -257,7 +257,10 @@ def visualizar_pilotos(db_controller, escuderia):
     botao_buscar.pack(pady=5)
 
 def cadastrar_pilotos():
+    #Incluir
+
     pass
+
     
 def build_escuderia_home(frame, db_controller, cpi, escuderia):
     customtkinter.CTkLabel(master=frame, text=f"Painel da Escuderia {escuderia}", font=("Garamond", 14)).place(relx=0.5, rely=0.1, anchor=tkinter.CENTER)
